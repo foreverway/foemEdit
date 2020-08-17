@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+</head>
+
+<body>
+    <div id="app">
+        <div v-for="(item,index) in formList" :key="`key_${index}`"
+            style="border:1px solid silver;padding:5px;width:800px;margin:auto;">
+            <el-form :model="item" label-width="90px" class="rowStyle" ref="itemFormList">
+                <el-row type="flex" class="row-bg" justify="space-around">
+
+
+                    <el-col :span="4">
+                        <el-switch size="small" v-model="item.editTrue" active-text="修改后续"></el-switch>
+                    </el-col>
+                    <el-col :span="2"></el-col>
+
+                    <el-col :span="2" style="height:40px;line-height:30px;">
+                        <el-button type="danger" v-if="formList.length>1" size="mini" style="margin-right:20px;"
+                            icon="el-icon-delete" @click="deleteForm(item)">删除</el-button>
+                    </el-col>
+                    <el-col :span="2" style="height:40px;line-height:30px;">
+                        <el-button type="success" size="mini" icon="el-icon-share" @click="handleIconClick({})">新增
+                        </el-button>
+                    </el-col>
+                </el-row>
+
+
+
+                <el-row type="flex" class="row-bg" justify="space-around" style="height:40px;line-height:40px;">
+                    <el-col :span="24">
+                        <el-form-item label="呼叫主题"  >
+                            <el-input size="small" v-model="item.fromTheme"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row type="flex" class="row-bg" justify="space-around">
+                    <el-col :span="8">
+                        <el-form-item label="呼叫类型" >
+                            <el-select v-model="item.fromType" size="small">
+                                <el-option v-for="item in options_type" :key="item.label" :label="item.label"
+                                    :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="服务类型">
+                            <el-radio-group size="small" v-model="item.feeType">
+                                <el-radio :label="1">免费</el-radio>
+                                <el-radio :label="2">收费</el-radio>
+                            </el-radio-group>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="8">
+                        <el-form-item label="呼叫状态">
+                            <!-- <el-input v-model="form.status" disabled></el-input> -->
+                            <el-select size="small" v-model="item.status" clearable placeholder="请选择">
+                                <el-option v-for="ite in options_status" :key="ite.value" :label="ite.label"
+                                    :value="ite.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+
+                </el-row>
+
+
+
+                <el-form-item>
+                    <el-row :gutter="10" type="flex" class="row-bg" justify="space-around">
+                        <el-col :span="6"></el-col>
+                        <el-col :span="4">
+                            <div class="showSort" style="height:40px;line-height:40px;">{{index+1}}/{{formList.length}}
+                            </div>
+                        </el-col>
+                    </el-row>
+                </el-form-item>
+            </el-form>
+        </div>
+
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            thisPage : 0,
+            options_status: [
+                { label: "已回访", value: 10 },
+                { label: "已解决", value: 9 },
+                { label: "已接收", value: 8 },
+                { label: "已挂起", value: 7 },
+                { label: "已外出", value: 6 },
+                { label: "已排配", value: 5 },
+                { label: "待处理", value: 4 },
+                { label: "已取消", value: 3 },
+                { label: "已确认", value: 2 },
+                { label: "待确认", value: 1 },
+            ],
+            formList: [
+                {
+                    status: 1, //呼叫状态 1-待确认 2-已确认 3-已取消 4-待处理 5-已排配 6-已外出 7-已挂起 8-已接收 9-已解决 10-已回访
+                    fromTheme: "", //呼叫主题
+                    feeType: 1,
+
+                    fromType: 1, //呼叫类型1-提交呼叫 2-在线解答（已解决）
+                    editTrue: true, //修改后续的状态
+                },
+            ], //表单依赖的表格数据
+            options_type: [
+                { value: 1, label: "提交呼叫" },
+                { value: 2, label: "在线解答" },
+            ], //呼叫类型
+            options_quick: [
+                { label: "高", value: 3 },
+                { label: "中", value: 2 },
+                { label: "低", value: 1 },
+            ],
+        },
+        computed: {
+    newValue() {
+      return JSON.stringify(this.formList);
+    },
+  },
+  watch: {
+    newValue: {
+      handler: function (Val, Val1) {
+        let newVal = JSON.parse(Val);
+        let oldVal = JSON.parse(Val1);
+          newVal.map((item, index) => {
+            //循环新数组的每一项对象
+            if (
+              JSON.stringify(newVal[index]) !== JSON.stringify(oldVal[index])
+            ) {
+              let newValChild = newVal[index]; //新值的每一项
+              let oldValChild = oldVal[index];
+                for (let item1 in oldValChild) {
+                  if (newValChild[item1] !== oldValChild[item1]) {
+                    //如果新值和旧值不一样
+                    let sliceList = this.formList.slice(index);
+                    if (this.formList[index].editTrue) {
+                      //如果可以修改
+                      if (
+                        item1 == "editTrue" 
+                      ) {
+                        return;
+                      }else {
+                        sliceList.map((itemF, ind) => {
+                          if (ind !== 0) {
+                            itemF[item1] = newValChild[item1];
+                          }
+                        });
+                      }
+                    }
+                  
+                }
+            }
+            }
+          });
+        
+      },
+
+      deep: true,}
+      // immediate: true
+    },
+        methods: {
+            handleIconClick(){
+                this.formList.push({
+              editTrue: false,
+              feeType: 1,
+              fromTheme:"",
+              fromType: 1,
+              priority:  1,
+            });
+            },
+
+        },
+    })
+</script>
+
+</html>
